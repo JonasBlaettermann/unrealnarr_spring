@@ -3,6 +3,8 @@ package com.sevenprinciples.controller;
 import com.sevenprinciples.entity.AuthUser;
 import com.sevenprinciples.repository.UserRepository;
 import com.sevenprinciples.service.UserServiceImpl;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,7 +19,9 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
+@Tag(name="Account", description="the Account API")
 @AllArgsConstructor
+@RequestMapping("/api/account")
 public class UserController {
 
     private final UserRepository userRepository;
@@ -29,6 +33,9 @@ public class UserController {
     @Autowired
     private AuthenticationManager authenticationManager;
 
+    @Operation(
+            summary = "Register a User",
+            description = "Registers a user to the database via Username and Password")
     @PostMapping("/register")
     public ResponseEntity registerUser(@RequestBody AuthUser user){
         try {
@@ -43,6 +50,9 @@ public class UserController {
         }
     }
 
+    @Operation(
+            summary = "Signin a User",
+            description = "One can signin as a User via Username and Password")
     @PostMapping("/signin")
     public ResponseEntity<?> login(@RequestBody LoginRequest loginRequest) {
         String username = loginRequest.getUsername();
@@ -63,7 +73,6 @@ public class UserController {
 
     @Data
     private static class LoginRequest {
-        private int id;
         private String username;
         private String password;
     }
