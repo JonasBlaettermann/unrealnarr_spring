@@ -5,18 +5,28 @@ import lombok.Data;
 import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
 
-import org.bson.types.ObjectId;
-
-import javax.persistence.Id;
+import javax.persistence.*;
+import java.util.Collection;
 
 @Data
 @Builder
 @Document("user")
 public class AuthUser {
     @Id
-    private  ObjectId id;
+    @GeneratedValue(strategy= GenerationType.AUTO)
+    private String id;
     @Indexed
     private String username;
     private String password;
     private boolean active;
+
+    @ManyToMany
+    @JoinTable(
+            name = "users_roles",
+            joinColumns = @JoinColumn(
+                    name = "user_id", referencedColumnName = "id"),
+            inverseJoinColumns = @JoinColumn(
+                    name = "role_id", referencedColumnName = "id"))
+    private Collection<Role> roles;
+
 }
