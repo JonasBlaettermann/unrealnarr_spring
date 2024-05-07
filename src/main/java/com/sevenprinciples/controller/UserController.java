@@ -1,6 +1,9 @@
 package com.sevenprinciples.controller;
 
 import com.sevenprinciples.entity.AuthUser;
+import com.sevenprinciples.entity.Role;
+import com.sevenprinciples.repository.PrivilegeRepository;
+import com.sevenprinciples.repository.RoleRepository;
 import com.sevenprinciples.repository.UserRepository;
 import com.sevenprinciples.service.UserServiceImpl;
 import io.swagger.v3.oas.annotations.Operation;
@@ -18,6 +21,10 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.List;
+
 @RestController
 @CrossOrigin(origins = "http://localhost:3000")
 @Tag(name="Account", description="the Account API")
@@ -27,6 +34,7 @@ public class UserController {
 
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
+    private final RoleRepository roleRepository;
 
     @Autowired
     private UserServiceImpl userService;
@@ -44,6 +52,9 @@ public class UserController {
                 return ResponseEntity.status(HttpStatus.CONFLICT).body("Username already taken. Please try again");
             user.setPassword(passwordEncoder.encode(user.getPassword()));
             user.setActive(true);
+            Role adminRole = roleRepository.findByName("USER");
+            List<Role> role = Arrays.asList(adminRole);
+            user.setRoles(role);
             userRepository.save(user);
             return ResponseEntity.ok(HttpStatus.CREATED);
         } catch (Exception e){
