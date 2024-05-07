@@ -75,9 +75,7 @@ public class UserController {
                     new UsernamePasswordAuthenticationToken(username, password));
             SecurityContextHolder.getContext().setAuthentication(authentication);
 
-            userRepository.findByUsername(username);
-
-            return ResponseEntity.ok("{\"message\": \"Login successful\"}");
+            return ResponseEntity.ok(userRepository.findByUsername(username));
         } catch (BadCredentialsException ex) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
