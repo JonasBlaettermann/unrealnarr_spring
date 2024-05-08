@@ -1,8 +1,10 @@
 package com.sevenprinciples.service;
 
 import com.sevenprinciples.entity.AuthUser;
+import com.sevenprinciples.entity.Country;
 import com.sevenprinciples.entity.Privilege;
 import com.sevenprinciples.entity.Role;
+import com.sevenprinciples.repository.RoleRepository;
 import com.sevenprinciples.repository.UserRepository;
 import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,10 +16,7 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 @Service
 @AllArgsConstructor
@@ -25,6 +24,8 @@ public class UserServiceImpl implements UserDetailsService {
 
     @Autowired
     private UserRepository userRepository;
+
+    private RoleRepository roleRepository;
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
