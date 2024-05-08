@@ -15,10 +15,16 @@ public class Country {
  private String id;
  private String name;
  private String countryCode;
+ private String capital;
+ private String population;
+ private String formOfGovernment;
 
- public Country(String name, String countryCode) {
+ public Country(String name, String countryCode, String capital, String population, String formOfGovernment) {
   this.name = name;
   this.countryCode = countryCode;
+  this.capital = capital;
+  this.population = population;
+  this.formOfGovernment = formOfGovernment;
  }
 }
 
