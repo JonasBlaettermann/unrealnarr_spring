@@ -56,7 +56,6 @@ public class UserController {
             List<Role> roles = Collections.singletonList(role);
             user.setRoles(roles);
             userRepository.save(user);
-
             protocolController.setProtocol(new Protocol("Registrieren", user.getUsername()));
 
             return ResponseEntity.ok(HttpStatus.CREATED);
@@ -114,6 +113,7 @@ public class UserController {
                 }
                 List<Role> roles = Collections.singletonList(newRole);;
                 user.setRoles(roles);
+                protocolController.setProtocol(new Protocol("Changed the Role to " + newRole.getName(), user.getUsername()));
                 userRepository.save(user);
             } else {
                 throw new IllegalArgumentException("Es existiert der User mit der ID " + id + " nicht in der Datenbank");
