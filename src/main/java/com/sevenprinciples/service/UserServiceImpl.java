@@ -1,7 +1,6 @@
 package com.sevenprinciples.service;
 
 import com.sevenprinciples.entity.AuthUser;
-import com.sevenprinciples.entity.Country;
 import com.sevenprinciples.entity.Privilege;
 import com.sevenprinciples.entity.Role;
 import com.sevenprinciples.repository.RoleRepository;

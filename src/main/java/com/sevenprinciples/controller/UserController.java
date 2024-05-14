@@ -1,9 +1,8 @@
 package com.sevenprinciples.controller;
 
 import com.sevenprinciples.entity.AuthUser;
-import com.sevenprinciples.entity.Country;
+import com.sevenprinciples.entity.Protocol;
 import com.sevenprinciples.entity.Role;
-import com.sevenprinciples.repository.PrivilegeRepository;
 import com.sevenprinciples.repository.RoleRepository;
 import com.sevenprinciples.repository.UserRepository;
 import com.sevenprinciples.service.UserServiceImpl;
@@ -11,7 +10,6 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.AllArgsConstructor;
 import lombok.Data;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -23,8 +21,6 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.Arrays;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
@@ -38,6 +34,7 @@ public class UserController {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final RoleRepository roleRepository;
+    private final ProtocolController protocolController;
 
     @Autowired
     private UserServiceImpl userService;
@@ -59,6 +56,9 @@ public class UserController {
             List<Role> roles = Collections.singletonList(role);
             user.setRoles(roles);
             userRepository.save(user);
+
+            protocolController.setProtocol(new Protocol("Registrieren", user.getUsername()));
+
             return ResponseEntity.ok(HttpStatus.CREATED);
         } catch (Exception e){
             return ResponseEntity.internalServerError().body(e.getMessage());
@@ -77,10 +77,13 @@ public class UserController {
             Authentication authentication = authenticationManager.authenticate(
                     new UsernamePasswordAuthenticationToken(username, password));
             SecurityContextHolder.getContext().setAuthentication(authentication);
+            protocolController.setProtocol(new Protocol("Login", username));
 
             return ResponseEntity.ok(userRepository.findByUsername(username));
         } catch (BadCredentialsException ex) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        } catch (Exception e) {
+            throw new RuntimeException(e);
         }
     }
 

@@ -31,7 +31,7 @@ public class SecurityConfig {
         return httpSecurity
                 .csrf(csrf-> csrf.disable())
                 .authorizeHttpRequests(auth-> auth.requestMatchers(
-                        "/api/account/*","/error","/swagger.ui","/","/api/countries/*","/api/*")
+                        "/api/account/*","/error","/swagger.ui","/","/api/countries/*","/api/*", "api/protocol/*")
                         .permitAll().anyRequest().authenticated())
                 .httpBasic(Customizer.withDefaults())
                 .formLogin(Customizer.withDefaults())

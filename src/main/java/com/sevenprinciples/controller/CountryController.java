@@ -1,9 +1,11 @@
 package com.sevenprinciples.controller;
 
 import com.sevenprinciples.entity.Country;
+import com.sevenprinciples.entity.Protocol;
 import com.sevenprinciples.service.CountryServiceImpl;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -11,18 +13,18 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.Collection;
 
+@RestController
 @CrossOrigin(origins = "http://localhost:3000")
 @Tag(name="Country", description="the Country API")
-@RestController
+@AllArgsConstructor
 @RequestMapping("/api/countries")
 public class CountryController {
 
     @Autowired
     private final CountryServiceImpl service;
 
-    public CountryController(CountryServiceImpl service) {
-        this.service = service;
-    }
+    @Autowired
+    private final ProtocolController protocolController;
 
     @Operation(
             summary = "Fetch all countries",
@@ -55,6 +57,7 @@ public class CountryController {
     public ResponseEntity<Country> setCountry(@RequestBody Country country) throws Exception {
         if (country != null) {
             service.setCountry(country);
+            protocolController.setProtocol(new Protocol("Create new Country", "TEMP"));
             return new ResponseEntity<>(country, HttpStatus.CREATED);
         }
         return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
@@ -68,6 +71,7 @@ public class CountryController {
     public ResponseEntity<String> updateCountry(@PathVariable("id") final String id, @RequestBody final Country country) {
         try {
             service.updateCountry(id, country);
+            protocolController.setProtocol(new Protocol("Updated the Country: " + country.getName(), "TEMP"));
             return ResponseEntity.ok("Land erfolgreich aktualisiert.");
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Ein Fehler ist aufgetreten.");
@@ -81,6 +85,8 @@ public class CountryController {
     public ResponseEntity<String> deleteCountry(@PathVariable String id) {
         try {
             service.deleteCountry(id);
+            protocolController.setProtocol(new Protocol("Deleted a Country", "TEMP"));
+
             return ResponseEntity.ok("Land wurde erfolgreich gelöscht.");
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Ein Fehler ist aufgetreten.");
