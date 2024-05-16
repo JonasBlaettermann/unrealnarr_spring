@@ -24,12 +24,18 @@ import org.springframework.web.bind.annotation.*;
 import java.util.Collections;
 import java.util.List;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+
 @RestController
 @CrossOrigin(origins = "http://localhost:3000")
 @Tag(name="Account", description="the Account API")
 @AllArgsConstructor
 @RequestMapping("/api/account")
 public class UserController {
+
+    private static final Logger logger = LoggerFactory.getLogger(UserController.class);
 
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
