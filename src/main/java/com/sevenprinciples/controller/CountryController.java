@@ -3,16 +3,20 @@ package com.sevenprinciples.controller;
 import com.sevenprinciples.entity.Country;
 import com.sevenprinciples.entity.Protocol;
 import com.sevenprinciples.service.CountryServiceImpl;
+import com.sevenprinciples.service.ProtocolServiceImpl;
 import com.sevenprinciples.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.AllArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.web.bind.annotation.*;
 
 import java.security.Principal;
@@ -29,13 +33,28 @@ public class CountryController {
     private final CountryServiceImpl service;
 
     @Autowired
-    private final ProtocolController protocolController;
+    private final ProtocolServiceImpl protocolService;
+
+    private static final Logger logger = LoggerFactory.getLogger(CountryController.class);
+
 
     @Operation(
             summary = "Fetch all countries",
             description = "Fetches a collection of all the countries in the database")
     @GetMapping("/")
     public ResponseEntity<Collection<Country>> findCountries() throws Exception {
+
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        Collection<? extends GrantedAuthority> authorities = authentication.getAuthorities();
+
+        for (GrantedAuthority authority : authorities) {
+            logger.info("User has authority: " + authority.getAuthority());
+        }
+
+        Object principal = SecurityContextHolder.getContext().getAuthentication();
+
+        logger.info("CountryController principal {}", principal);
+
         Collection<Country> countries = service.getCountries();
         if (countries != null) {
             return new ResponseEntity<>(countries, HttpStatus.OK);
@@ -62,7 +81,8 @@ public class CountryController {
     public ResponseEntity<Country> setCountry(@RequestBody Country country) throws Exception {
         if (country != null) {
             service.setCountry(country);
-            protocolController.setProtocol(new Protocol("Create new Country", getCurrentUsername()));
+
+            protocolService.addToProtocol(new Protocol("Create new Country", getCurrentUsername()));
             return new ResponseEntity<>(country, HttpStatus.CREATED);
         }
         return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
@@ -76,7 +96,8 @@ public class CountryController {
     public ResponseEntity<String> updateCountry(@PathVariable("id") final String id, @RequestBody final Country country) {
         try {
             service.updateCountry(id, country);
-            protocolController.setProtocol(new Protocol("Updated the Country: " + country.getName(), getCurrentUsername()));
+            logger.info("Erfolgreich verändert von {}", getCurrentUsername());
+            protocolService.addToProtocol(new Protocol("Updated the Country: " + country.getName(), getCurrentUsername()));
             return ResponseEntity.ok("Land erfolgreich aktualisiert.");
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Ein Fehler ist aufgetreten.");
@@ -90,7 +111,7 @@ public class CountryController {
     public ResponseEntity<String> deleteCountry(@PathVariable String id) {
         try {
             service.deleteCountry(id);
-            protocolController.setProtocol(new Protocol("Deleted a Country", getCurrentUsername()));
+            protocolService.addToProtocol(new Protocol("Deleted a Country", getCurrentUsername()));
 
             return ResponseEntity.ok("Land wurde erfolgreich gelöscht.");
         } catch (Exception e) {

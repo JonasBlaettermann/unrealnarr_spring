@@ -1,10 +1,13 @@
 package com.sevenprinciples.controller;
 
+import com.sevenprinciples.config.JwtProvider;
+import com.sevenprinciples.entity.AuthResponse;
 import com.sevenprinciples.entity.AuthUser;
 import com.sevenprinciples.entity.Protocol;
 import com.sevenprinciples.entity.Role;
 import com.sevenprinciples.repository.RoleRepository;
 import com.sevenprinciples.repository.UserRepository;
+import com.sevenprinciples.service.ProtocolServiceImpl;
 import com.sevenprinciples.service.UserServiceImpl;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -18,6 +21,7 @@ import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
@@ -43,6 +47,9 @@ public class UserController {
     private final ProtocolController protocolController;
 
     @Autowired
+    private ProtocolServiceImpl protocolService;
+
+    @Autowired
     private UserServiceImpl userService;
 
     @Autowired
@@ -62,7 +69,7 @@ public class UserController {
             List<Role> roles = Collections.singletonList(role);
             user.setRoles(roles);
             userRepository.save(user);
-            protocolController.setProtocol(new Protocol("Registrieren", user.getUsername()));
+            protocolService.addToProtocol(new Protocol("Registrieren", user.getUsername()));
 
             return ResponseEntity.ok(HttpStatus.CREATED);
         } catch (Exception e){
@@ -77,19 +84,39 @@ public class UserController {
     public ResponseEntity<?> login(@RequestBody LoginRequest loginRequest) {
         String username = loginRequest.getUsername();
         String password = loginRequest.getPassword();
-
         try {
             Authentication authentication = authenticationManager.authenticate(
                     new UsernamePasswordAuthenticationToken(username, password));
             SecurityContextHolder.getContext().setAuthentication(authentication);
-            protocolController.setProtocol(new Protocol("Login", username));
+            logger.info("UserController Authentication {}", authentication);
+            String token = JwtProvider.generateToken(authentication);
+            AuthResponse authResponse = new AuthResponse();
+            authResponse.setMessage("Login successful");
+            authResponse.setJwt(token);
+            authResponse.setStatus(true);
+            authResponse.setUser(userRepository.findByUsername(username).get());
 
-            return ResponseEntity.ok(userRepository.findByUsername(username));
+            protocolService.addToProtocol(new Protocol("Login", username));
+
+            Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+            String userNamens = ((UserDetails)principal).getUsername();
+            logger.info("UserController username {}", userNamens);
+            logger.info("UserController Principal {}", principal);
+
+            return new ResponseEntity<>(authResponse, HttpStatus.OK);
         } catch (BadCredentialsException ex) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
+    }
+
+    @Operation(
+            summary = "Signout a User",
+            description = "A function to Singout a user")
+    @PostMapping("/signout")
+    public ResponseEntity<?> signout() {
+        return ResponseEntity.ok("Ausgelogt");
     }
 
     @Operation(
@@ -119,7 +146,7 @@ public class UserController {
                 }
                 List<Role> roles = Collections.singletonList(newRole);;
                 user.setRoles(roles);
-                protocolController.setProtocol(new Protocol("Changed the Role to " + newRole.getName(), user.getUsername()));
+                protocolService.addToProtocol(new Protocol("Changed the Role to " + newRole.getName(), user.getUsername()));
                 userRepository.save(user);
             } else {
                 throw new IllegalArgumentException("Es existiert der User mit der ID " + id + " nicht in der Datenbank");
