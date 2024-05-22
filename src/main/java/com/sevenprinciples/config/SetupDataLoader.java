@@ -1,6 +1,5 @@
 package com.sevenprinciples.config;
 
-import com.sevenprinciples.entity.AuthUser;
 import com.sevenprinciples.entity.Privilege;
 import com.sevenprinciples.entity.Role;
 import com.sevenprinciples.repository.PrivilegeRepository;

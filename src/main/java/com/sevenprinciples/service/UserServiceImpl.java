@@ -1,7 +1,6 @@
 package com.sevenprinciples.service;
 
 import com.sevenprinciples.entity.AuthUser;
-import com.sevenprinciples.entity.Country;
 import com.sevenprinciples.entity.Privilege;
 import com.sevenprinciples.entity.Role;
 import com.sevenprinciples.repository.RoleRepository;
@@ -29,16 +28,15 @@ public class UserServiceImpl implements UserDetailsService {
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        Optional<AuthUser> authUser = userRepository.findByUsername(username.toLowerCase());
+        Optional<AuthUser> authUser = userRepository.findByUsername(username);
         if (!authUser.isPresent()) {
             throw new UsernameNotFoundException(username);
         } else {
-            return User.builder()
-                    .username(authUser.get().getUsername())
-                    .password(authUser.get().getPassword())
-                    .disabled(!authUser.get().isActive())
-                    .roles(getPrivileges(authUser.get().getRoles()).getFirst())
-                    .build();
+            return new User(
+                    authUser.get().getUsername(),
+                    authUser.get().getPassword(),
+                    getAuthorities(authUser.get().getRoles())
+            );
         }
     }
 

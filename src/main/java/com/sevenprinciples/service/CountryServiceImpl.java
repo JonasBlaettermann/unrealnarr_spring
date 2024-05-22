@@ -25,7 +25,7 @@ public class CountryServiceImpl implements CountryService {
 
     @Override
     public void setCountry(Country country) throws Exception {
-        if(country!=null) {
+        if (country != null) {
             countryRepository.save(country);
             return;
         } throw new Exception("Country is null");
@@ -33,7 +33,7 @@ public class CountryServiceImpl implements CountryService {
 
     @Override
     public void updateCountry(String id, Country country) {
-        if(countryRepository.existsById(id)) {
+        if (countryRepository.existsById(id)) {
             country.setId(id);
             countryRepository.save(country);
         } else {

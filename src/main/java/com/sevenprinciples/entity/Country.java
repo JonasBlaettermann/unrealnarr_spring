@@ -16,10 +16,10 @@ public class Country {
  private String name;
  private String countryCode;
  private String capital;
- private String population;
+ private double population;
  private String formOfGovernment;
 
- public Country(String name, String countryCode, String capital, String population, String formOfGovernment) {
+ public Country(String name, String countryCode, String capital, int population, String formOfGovernment) {
   this.name = name;
   this.countryCode = countryCode;
   this.capital = capital;
