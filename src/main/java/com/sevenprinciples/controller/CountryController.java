@@ -82,7 +82,7 @@ public class CountryController {
         if (country != null) {
             service.setCountry(country);
 
-            protocolService.addToProtocol(new Protocol("Create new Country", getCurrentUsername()));
+            protocolService.addToProtocol(new Protocol("Create new Country: " + country.getName(), getCurrentUsername()));
             return new ResponseEntity<>(country, HttpStatus.CREATED);
         }
         return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
@@ -98,7 +98,7 @@ public class CountryController {
             service.updateCountry(id, country);
             logger.info("Erfolgreich verändert von {}", getCurrentUsername());
             protocolService.addToProtocol(new Protocol("Updated the Country: " + country.getName(), getCurrentUsername()));
-            return ResponseEntity.ok("Land erfolgreich aktualisiert.");
+            return ResponseEntity.ok("Land " + country.getName() + " erfolgreich aktualisiert.");
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Ein Fehler ist aufgetreten.");
         }
@@ -110,10 +110,11 @@ public class CountryController {
     @DeleteMapping("/{id}")
     public ResponseEntity<String> deleteCountry(@PathVariable String id) {
         try {
+            String country = service.findById(id).getName();
             service.deleteCountry(id);
-            protocolService.addToProtocol(new Protocol("Deleted a Country", getCurrentUsername()));
+            protocolService.addToProtocol(new Protocol("Deleted a Country: " + country , getCurrentUsername()));
 
-            return ResponseEntity.ok("Land wurde erfolgreich gelöscht.");
+            return ResponseEntity.ok("Land " + country + " wurde erfolgreich gelöscht.");
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Ein Fehler ist aufgetreten.");
         }
