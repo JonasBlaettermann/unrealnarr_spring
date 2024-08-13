@@ -37,8 +37,6 @@ public class TimeRecorderController {
     @GetMapping("/")
     public ResponseEntity<Collection<TimeRecorder>> fetchTimeRecords() throws Exception {
 
-        // TODO: Soll hier schon gefiltert werden?
-
         Collection<TimeRecorder> timeRecorder = service.getTimeRecorder();
         if (timeRecorder != null) {
             return new ResponseEntity<>(timeRecorder, HttpStatus.OK);
@@ -68,7 +66,7 @@ public class TimeRecorderController {
     public ResponseEntity<String> updateTimeRecorder(@PathVariable("id") final String id, @RequestBody final TimeRecorder timeRecord) {
         try {
             service.updateTimeRecorder(id, timeRecord);
-            protocolService.addToProtocol(new Protocol("Updated time record: " + timeRecord.getId(), getCurrentUsername()));
+            protocolService.addToProtocol(new Protocol("Stopped time record at: " + timeRecord.getEnd(), getCurrentUsername()));
             return ResponseEntity.ok("TimeRecord " + timeRecord.getId() + " erfolgreich aktualisiert.");
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Ein Fehler ist aufgetreten.");
