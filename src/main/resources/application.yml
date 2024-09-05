@@ -2,4 +2,4 @@ spring:
   data:
     mongodb:
       uri: mongodb+srv://jonas_b:jonas_b@cluster0.jsz71my.mongodb.net/
-      database: country
+      database: unrealnarr

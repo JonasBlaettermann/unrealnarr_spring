@@ -9,7 +9,7 @@
 		<relativePath/> <!-- lookup parent from repository -->
 	</parent>
 	<groupId>com</groupId>
-	<artifactId>sevenprinciples</artifactId>
+	<artifactId>unrelnar_spring</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
 	<name>sevenprinciples</name>
 	<description>A test project for a 7P project</description>
@@ -103,6 +103,12 @@
 			<version>0.11.5</version>
 			<scope>runtime</scope>
 		</dependency>
+		<dependency>
+			<groupId>com.opencsv</groupId>
+			<artifactId>opencsv</artifactId>
+			<version>5.7.1</version>
+		</dependency>
+
 	</dependencies>
 
 	<build>
