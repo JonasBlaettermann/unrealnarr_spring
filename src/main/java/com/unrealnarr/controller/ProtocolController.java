@@ -1,7 +1,5 @@
 package com.unrealnarr.controller;
 
-import com.unrealnarr.entity.Protocol;
-import com.unrealnarr.service.ProtocolServiceImpl;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,6 +14,9 @@ import java.util.Collection;
 @RestController
 @RequestMapping("/api/protocols")
 public class ProtocolController {
+
+    /*
+
 
     @Autowired
     private final ProtocolServiceImpl service;
@@ -45,6 +46,8 @@ public class ProtocolController {
         }
         return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
     }
+
+     */
 }
 
 

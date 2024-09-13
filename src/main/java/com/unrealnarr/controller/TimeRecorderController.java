@@ -1,9 +1,5 @@
 package com.unrealnarr.controller;
 
-import com.unrealnarr.entity.Protocol;
-import com.unrealnarr.entity.TimeRecorder;
-import com.unrealnarr.service.ProtocolServiceImpl;
-import com.unrealnarr.service.TimeRecorderServiceImpl;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.AllArgsConstructor;
@@ -23,6 +19,7 @@ import java.util.Collection;
 @RequestMapping("/api/timerecorder")
 public class TimeRecorderController {
 
+    /*
     @Autowired
     private final TimeRecorderServiceImpl service;
 
@@ -79,4 +76,6 @@ public class TimeRecorderController {
             return principal.toString();
         }
     }
+
+     */
 }

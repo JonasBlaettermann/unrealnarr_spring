@@ -1,9 +1,5 @@
 package com.unrealnarr.controller;
 
-import com.unrealnarr.entity.Country;
-import com.unrealnarr.entity.Protocol;
-import com.unrealnarr.service.CountryServiceImpl;
-import com.unrealnarr.service.ProtocolServiceImpl;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.AllArgsConstructor;
@@ -27,6 +23,7 @@ import java.util.Collection;
 @RequestMapping("/api/countries")
 public class CountryController {
 
+    /*
     @Autowired
     private final CountryServiceImpl service;
 
@@ -127,4 +124,6 @@ public class CountryController {
         }
 
     }
+
+     */
 }

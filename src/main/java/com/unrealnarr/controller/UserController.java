@@ -1,35 +1,8 @@
 package com.unrealnarr.controller;
 
-import com.unrealnarr.config.JwtProvider;
-import com.unrealnarr.entity.AuthResponse;
-import com.unrealnarr.entity.AuthUser;
-import com.unrealnarr.entity.Protocol;
-import com.unrealnarr.entity.Role;
-import com.unrealnarr.repository.RoleRepository;
-import com.unrealnarr.repository.UserRepository;
-import com.unrealnarr.service.ProtocolServiceImpl;
-import com.unrealnarr.service.UserServiceImpl;
-import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.AllArgsConstructor;
-import lombok.Data;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.BadCredentialsException;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.Collections;
-import java.util.List;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 
 @RestController
@@ -39,6 +12,7 @@ import org.slf4j.LoggerFactory;
 @RequestMapping("/api/account")
 public class UserController {
 
+    /*
     private static final Logger logger = LoggerFactory.getLogger(UserController.class);
 
     private final UserRepository userRepository;
@@ -162,4 +136,6 @@ public class UserController {
         private String username;
         private String password;
     }
+
+     */
 }
