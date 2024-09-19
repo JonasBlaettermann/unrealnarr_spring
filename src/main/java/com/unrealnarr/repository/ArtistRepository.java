@@ -9,7 +9,9 @@ import java.util.Optional;
 @Repository
 public interface ArtistRepository extends MongoRepository<Artist, String> {
 
-    Optional<Artist> findByNconst(String nconst);
+    public Optional<Artist> findById(String nconst);
+
+    public Optional<Artist> findByNconst(String nconst);
 
 }
 

@@ -33,8 +33,8 @@ public class ArtistController {
     private ArtistService service;
 
     @Operation(
-            summary = "Fetch all critics",
-            description = "Fetches a collection of all the critics in the database")
+            summary = "Fetch all artists",
+            description = "Fetches a collection of all the artists in the database. With nconst as a primary key, a primaryName and roleInMovie with a tconst of the movie, the ordering number, the category and job and characters name")
     @GetMapping("/")
     public ResponseEntity<Collection<Artist>> findArtists() throws Exception {
         try {
@@ -49,6 +49,27 @@ public class ArtistController {
         }
     }
 
+    @Operation(
+            summary = "Fetch a single artist",
+            description = "Fetches a artist via nconst, with primaryName and roleInMovie with with a tconst of the movie, the ordering number, the category and job and characters name")
+    @GetMapping("/{id}")
+    public ResponseEntity<Artist> findById(@PathVariable String id) throws Exception {
+        try {
+            logger.info(id);
+            Artist artist = service.findByNconst(id);
+            if (artist != null) {
+                return new ResponseEntity<>(artist, HttpStatus.OK);
+            } else {
+                return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+            }
+        } catch (Exception e) {
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    @Operation(
+            summary = "Upload artists dataset",
+            description = "Takes a .TSV file and prepares it to be uploaded to the MongoDB")
     @PostMapping("/upload")
     public ResponseEntity<String> uploadArtistData(@RequestParam("file") MultipartFile file) {
         try {
@@ -62,6 +83,24 @@ public class ArtistController {
         }
     }
 
+    @Operation(
+            summary = "Update artist dataset",
+            description = "Takes a .TSV file and prepares it to be uploaded to the MongoDB and update all the necessary entries and create new entries for new artists")
+    @PutMapping("/upload")
+    public ResponseEntity<String> updateMovies(@RequestParam("file") MultipartFile file) {
+        try {
+            List<Artist> artists = parseTsvFile(file);
+            logger.info(artists.toString());
+            service.updateArtists(artists);
+            return ResponseEntity.ok("Artists updated successfully");
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    // This function is to parse the TSV file, so it will spit out a useful JSON. The roleInMovie will be parsed in a seperate function.
     private List<Artist> parseTsvFile(MultipartFile file) throws IOException {
         try (BufferedReader reader = new BufferedReader(new InputStreamReader(file.getInputStream()))) {
             String line;
@@ -74,17 +113,12 @@ public class ArtistController {
                     continue;
                 }
 
-                String nconst = fields[0];
-                String primaryName = fields[1];
-                String roleInMovieJson = fields[2];
-
-                List<Artist.RoleInMovie> roles = parseRoleInMovieJson(roleInMovieJson);
-
                 Artist artist = new Artist();
-                artist.setNconst(nconst);
-                artist.setPrimaryName(primaryName);
+                artist.setNconst(fields[0]);
+                artist.setPrimaryName(fields[1]);
+                String roleInMovieJson = fields[2];
+                List<Artist.RoleInMovie> roles = parseRoleInMovieJson(roleInMovieJson);
                 artist.setRolesInMovies(roles);
-
                 artists.add(artist);
             }
 
@@ -93,6 +127,7 @@ public class ArtistController {
 
     }
 
+    // Takes the String of RoleInMovie and parses and cleans up the data, including some outliers in characters and job.
     private List<Artist.RoleInMovie> parseRoleInMovieJson(String roleInMovieJson) {
         try {
             String cleanedJson = roleInMovieJson
@@ -104,10 +139,11 @@ public class ArtistController {
                     .replace("\\\"", "\"")
                     .replace("\"\"", "\"");
 
-            cleanedJson = cleanCharacters(cleanedJson);
-            cleanedJson = cleanJobs(cleanedJson);
+            cleanedJson = cleanField(cleanedJson, "characters");
+            cleanedJson = cleanField(cleanedJson, "job");
             ObjectMapper objectMapper = new ObjectMapper();
-            return objectMapper.readValue(cleanedJson, new TypeReference<List<Artist.RoleInMovie>>() {});
+            return objectMapper.readValue(cleanedJson, new TypeReference<List<Artist.RoleInMovie>>() {
+            });
 
         } catch (Exception e) {
             logger.error("Error parsing roleInMovieJson: {}", e.getMessage());
@@ -115,8 +151,14 @@ public class ArtistController {
         }
     }
 
-    private String cleanCharacters(String json) {
-        Pattern pattern = Pattern.compile("\"" + "characters" + "\":\\s*\\[\\s*\"(.*?)\"\\s*\\]");
+    // This function will clean a field of " and unnecessary spaces
+    private String cleanField(String json, String field) {
+        Pattern pattern;
+        if (field.equals("characters")) {
+            pattern = Pattern.compile("\"" + "characters" + "\":\\s*\\[\\s*\"(.*?)\"\\s*\\]");
+        } else {
+            pattern = Pattern.compile("\"" + field + "\":\\s*\"(.*?)\"(?=[,}\\]])");
+        }
         Matcher matcher = pattern.matcher(json);
 
         StringBuffer sb = new StringBuffer();
@@ -124,16 +166,16 @@ public class ArtistController {
             String fieldContent = matcher.group(1);
 
             String fixedContent = fieldContent
-                    .replace("\"", "\\´")
-                    .replace("\"\"", "\"");
+                    .replace("\"", "\\'")
+                    .replace("\\\"", "\"");
 
-            matcher.appendReplacement(sb, "\"" + "characters" + "\": \"" + fixedContent + "\"");
+            matcher.appendReplacement(sb, "\"" + field + "\": \"" + fixedContent + "\"");
         }
         matcher.appendTail(sb);
-
-        return removeSegmentContent(sb.toString());
+        return sb.toString();
     }
 
+    // Removes the Segment Content, but I don't know if I really need this.
     private String removeSegmentContent(String fieldContent) {
         Pattern segmentPattern = Pattern.compile("\\(segment[^)]*\\)");
         Matcher segmentMatcher = segmentPattern.matcher(fieldContent);
@@ -145,24 +187,6 @@ public class ArtistController {
         cleanedContent = cleanedContent.replaceAll("^,|,$", "");
 
         return cleanedContent;
-    }
-
-    private String cleanJobs(String json) {
-        Pattern pattern = Pattern.compile("\"job\":\\s*\"(.*?)\"(?=[,}\\]])");
-        Matcher matcher = pattern.matcher(json);
-
-        StringBuffer sb = new StringBuffer();
-        while (matcher.find()) {
-            String fieldContent = matcher.group(1);
-
-            String fixedContent = fieldContent
-                    .replace("\"", "\\´")
-                    .replace("\\\"", "\"");
-
-            matcher.appendReplacement(sb, "\"job\": \"" + fixedContent + "\"");
-        }
-        matcher.appendTail(sb);
-        return sb.toString();
     }
 
 }

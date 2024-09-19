@@ -1,24 +1,17 @@
-package com.unrealnarr.entity;
+package com.unrealnarr.dto;
 
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import org.springframework.data.mongodb.core.mapping.Document;
-import org.springframework.data.mongodb.core.mapping.Field;
 
-import javax.persistence.*;
 import java.util.Date;
 import java.util.List;
 
 @Getter
 @Setter
 @NoArgsConstructor
-@Document(collection = "movie")
-public class Movie {
-
-    @Id
+public class MovieDTO {
     private String tconst;
-
     private String titleType;
     private String germanTitle;
     private String primaryTitle;
@@ -30,12 +23,6 @@ public class Movie {
     private double IMDBRating;
     private double rating;
     private Date date;
-
-    @Field("tags")
     private List<String> tags;
-
-    private String critics;
-
-    @Field("artistInfo")
-    private List<Artist> artistInfo;
+    private List<ArtistDTO> artistInfo;
 }
