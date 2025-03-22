@@ -14,6 +14,14 @@ import java.util.List;
 @NoArgsConstructor
 @Document(collection = "artist")
 public class Artist {
+    @Override
+    public String toString() {
+        return "Artist{" +
+                "nconst='" + nconst + '\'' +
+                ", primaryName='" + primaryName + '\'' +
+                ", rolesInMovies=" + rolesInMovies +
+                '}';
+    }
 
     @Id
     private String nconst;
@@ -23,7 +31,6 @@ public class Artist {
     @Setter
     @Getter
     public static class RoleInMovie {
-
         private String tconst;
         private int ordering;
         private String category;

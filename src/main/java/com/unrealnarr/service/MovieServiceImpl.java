@@ -34,14 +34,14 @@ public class MovieServiceImpl implements MovieService {
     }
 
     @Override
-    public Movie findMovieByTconst(String nconst) throws Exception {
-        Optional<Movie> movie = repository.findById(nconst);
+    public Movie findMovieByTconst(String tconst) throws Exception {
+        Optional<Movie> movie = repository.findByTconst(tconst);
         if (movie.isPresent()) {
-            logger.info("Fetched Artist with nconst : " + nconst);
+            logger.info("Fetched Movie with tconst : " + tconst);
             return movie.get();
         } else {
-            logger.warn("Artist with nconst : " + nconst + " doesn't exist");
-            throw new Exception("Artist with nconst : " + nconst + " doesn't exist");
+            logger.warn("Movie with tconst : " + tconst + " doesn't exist");
+            throw new Exception("Artist with nconst : " + tconst + " doesn't exist");
         }
     }
 
@@ -72,7 +72,6 @@ public class MovieServiceImpl implements MovieService {
                     movieDTO.setArtistInfo(movie.getArtistInfo().stream()
                             .map(artist -> {
                                 ArtistDTO artistDTO = new ArtistDTO();
-                                artistDTO.setNconst(artist.getNconst());
                                 artistDTO.setPrimaryName(artist.getPrimaryName());
                                 return artistDTO;
                             })
@@ -126,7 +125,6 @@ public class MovieServiceImpl implements MovieService {
 
             if (result.getMatchedCount() == 0) {
                 logger.warn("Movie not found with tconst: " + movie.getTconst());
-                logger.info("A new data entry will be created for this movie");
                 repository.save(movie);
             } else if (result.getModifiedCount() > 0) {
                 logger.info("Successfully updated movie with tconst: " + movie.getTconst());
@@ -142,9 +140,8 @@ public class MovieServiceImpl implements MovieService {
     @Override
     public void updateMovies(List<Movie> movies) throws Exception {
         for (Movie movie : movies) {
-            logger.info("Processing movie with tconst: " + movie.getTconst());
-
             Query query = new Query(Criteria.where("tconst").is(movie.getTconst()));
+
             Update update = new Update()
                     .set("primaryTitle", movie.getPrimaryTitle())
                     .set("originalTitle", movie.getOriginalTitle())
@@ -155,14 +152,14 @@ public class MovieServiceImpl implements MovieService {
                     .set("rating", movie.getRating())
                     .set("runtimeInMinutes", movie.getRuntimeInMinutes())
                     .set("tags", movie.getTags())
-                    .set("critics", movie.getCritics());
-
+                    .set("critics", movie.getCritics())
+                    .set("artistInfo", movie.getArtistInfo());
+                    // TODO: add Artist
             try {
                 UpdateResult result = mongoTemplate.updateFirst(query, update, Movie.class);
 
                 if (result.getMatchedCount() == 0) {
-                    logger.warn("Movie not found with tconst: " + movie.getTconst());
-                    logger.info("A new data entry will be created for this movie");
+                    logger.warn("New movie entry will be created with tconst: " + movie.getTconst());
                     repository.save(movie);
                 } else if (result.getModifiedCount() > 0) {
                     logger.info("Successfully updated movie with tconst: " + movie.getTconst());

@@ -22,6 +22,9 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -164,20 +167,21 @@ public class MovieController {
 
                 movie.setGenres(fields[8]);
 
+                try {
+                    movie.setIMDBRating(Float.parseFloat(fields[9]));
+                } catch (NumberFormatException e) {
+                    movie.setIMDBRating(0); // or some default value
+                }
+
                 ObjectMapper objectMapper = new ObjectMapper();
                 objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
                 try {
-                    List<Artist> artistInfo = parseArtistInfo(fields[9]);
+                    List<Artist> artistInfo = parseArtistInfo(fields[10]);
                     movie.setArtistInfo(artistInfo);
                 } catch (Exception e) {
                     movie.setArtistInfo(new ArrayList<>());
                 }
 
-                try {
-                    movie.setIMDBRating(Float.parseFloat(fields[10]));
-                } catch (NumberFormatException e) {
-                    movie.setIMDBRating(0); // or some default value
-                }
                 try {
                     movie.setRating(Float.parseFloat(fields[11]));
                 } catch (NumberFormatException e) {
@@ -190,11 +194,12 @@ public class MovieController {
                     movie.setCritics("");
                 }
 
-                SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+                DateTimeFormatter dateFormat = DateTimeFormatter.ofPattern("yyyy-MM-dd");
                 try {
-                    movie.setDate(dateFormat.parse(fields[13]));
-                } catch (ParseException e) {
-                    movie.setDate(new Date()); // or some default value
+                    LocalDate parseData = LocalDate.parse(fields[13], dateFormat);
+                    movie.setDate(parseData);
+                } catch (DateTimeParseException e) {
+                    movie.setDate(null);
                 }
 
                 movies.add(movie);
@@ -207,6 +212,7 @@ public class MovieController {
 
     // Takes a String of the artist Info and cleanes it up, including outliers in characters, job and primaryName.
     private List<Artist> parseArtistInfo(String artistInfoStr) {
+        logger.info("ArtistString: " + artistInfoStr);
         try {
             String cleanedStr = artistInfoStr
                     .replaceAll("\\\\", "")
@@ -220,6 +226,9 @@ public class MovieController {
             cleanedStr = cleanField(cleanedStr, "characters");
             cleanedStr = cleanField(cleanedStr, "job");
             cleanedStr = cleanField(cleanedStr, "primaryName");
+
+            logger.info("cleanedStr: " + cleanedStr);
+
 
             ObjectMapper objectMapper = new ObjectMapper();
             objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
@@ -279,7 +288,6 @@ public class MovieController {
             roles.add(roleInMovie);
             artist.setRolesInMovies(roles);
         }
-
         return artist;
     }
 

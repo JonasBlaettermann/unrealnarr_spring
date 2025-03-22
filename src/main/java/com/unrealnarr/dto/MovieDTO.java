@@ -4,7 +4,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import java.util.Date;
+import java.time.LocalDate;
 import java.util.List;
 
 @Getter
@@ -22,7 +22,7 @@ public class MovieDTO {
     private String genres;
     private double IMDBRating;
     private double rating;
-    private Date date;
+    private LocalDate date;
     private List<String> tags;
     private List<ArtistDTO> artistInfo;
 }

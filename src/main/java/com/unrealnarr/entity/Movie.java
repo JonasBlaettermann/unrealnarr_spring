@@ -7,7 +7,7 @@ import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.mapping.Field;
 
 import javax.persistence.*;
-import java.util.Date;
+import java.time.LocalDate;
 import java.util.List;
 
 @Getter
@@ -29,7 +29,7 @@ public class Movie {
     private String genres;
     private double IMDBRating;
     private double rating;
-    private Date date;
+    private LocalDate date;
 
     @Field("tags")
     private List<String> tags;

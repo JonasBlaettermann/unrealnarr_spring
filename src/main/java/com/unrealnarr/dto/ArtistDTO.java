@@ -8,6 +8,5 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 public class ArtistDTO {
-    private String nconst;
     private String primaryName;
 }
