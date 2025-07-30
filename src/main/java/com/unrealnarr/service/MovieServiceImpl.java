@@ -7,6 +7,8 @@ import com.unrealnarr.repository.MovieRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.stereotype.Service;
 
@@ -51,35 +53,36 @@ public class MovieServiceImpl implements MovieService {
     }
 
     @Override
-    public Collection<MovieDTO> getMovieList() throws Exception {
-        List<Movie> movies = repository.findAll();
-        return movies.stream()
-                .map(movie -> {
-                    MovieDTO movieDTO = new MovieDTO();
-                    movieDTO.setTconst(movie.getTconst());
-                    movieDTO.setTitleType(movie.getTitleType());
-                    movieDTO.setGermanTitle(movie.getGermanTitle());
-                    movieDTO.setPrimaryTitle(movie.getPrimaryTitle());
-                    movieDTO.setOriginalTitle(movie.getOriginalTitle());
-                    movieDTO.setStartYear(movie.getStartYear());
-                    movieDTO.setEndYear(movie.getEndYear());
-                    movieDTO.setRuntimeInMinutes(movie.getRuntimeInMinutes());
-                    movieDTO.setGenres(movie.getGenres());
-                    movieDTO.setIMDBRating(movie.getIMDBRating());
-                    movieDTO.setRating(movie.getRating());
-                    movieDTO.setDate(movie.getDate());
-                    movieDTO.setTags(movie.getTags());
-                    movieDTO.setArtistInfo(movie.getArtistInfo().stream()
-                            .map(artist -> {
-                                ArtistDTO artistDTO = new ArtistDTO();
-                                artistDTO.setPrimaryName(artist.getPrimaryName());
-                                return artistDTO;
-                            })
-                            .collect(Collectors.toList()));
-                    return movieDTO;
-                })
-                .collect(Collectors.toList());
+    public Page<MovieDTO> getMovieList(Pageable pageable) {
+        Page<Movie> moviePage = repository.findAll(pageable);
+
+        return moviePage.map(movie -> {
+            MovieDTO movieDTO = new MovieDTO();
+            movieDTO.setTconst(movie.getTconst());
+            movieDTO.setTitleType(movie.getTitleType());
+            movieDTO.setGermanTitle(movie.getGermanTitle());
+            movieDTO.setPrimaryTitle(movie.getPrimaryTitle());
+            movieDTO.setOriginalTitle(movie.getOriginalTitle());
+            movieDTO.setStartYear(movie.getStartYear());
+            movieDTO.setEndYear(movie.getEndYear());
+            movieDTO.setRuntimeInMinutes(movie.getRuntimeInMinutes());
+            movieDTO.setGenres(movie.getGenres());
+            movieDTO.setIMDBRating(movie.getIMDBRating());
+            movieDTO.setRating(movie.getRating());
+            movieDTO.setDate(movie.getDate());
+            movieDTO.setTags(movie.getTags());
+            if (movie.getArtistInfo() != null) {
+                movieDTO.setArtistInfo(movie.getArtistInfo().stream()
+                        .map(artist -> {
+                            ArtistDTO artistDTO = new ArtistDTO();
+                            artistDTO.setPrimaryName(artist.getPrimaryName());
+                            return artistDTO;
+                        }).collect(Collectors.toList()));
+            }
+            return movieDTO;
+        });
     }
+
 
     @Override
     public void saveAll(List<Movie> movies) throws Exception {

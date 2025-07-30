@@ -12,6 +12,10 @@ import io.swagger.v3.oas.annotations.Operation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -20,8 +24,6 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
@@ -78,11 +80,22 @@ public class MovieController {
             summary = "Fetch a list of movies",
             description = "Fetches a collection of all the movies in the database in a more comprehensive and searchable list")
     @GetMapping("/list")
-    public ResponseEntity<Collection<MovieDTO>> getMovieList() throws Exception {
+    public ResponseEntity<Page<MovieDTO>> getMovieList(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "20") int size,
+            @RequestParam(defaultValue = "primaryTitle") String sortBy,
+            @RequestParam(defaultValue = "asc") String sortDir
+    ) {
         try {
-            Collection<MovieDTO> movies = service.getMovieList();
-            if (movies != null && !movies.isEmpty()) {
-                return new ResponseEntity<>(movies, HttpStatus.OK);
+            Sort sort = sortDir.equalsIgnoreCase("desc") ?
+                    Sort.by(sortBy).descending() :
+                    Sort.by(sortBy).ascending();
+
+            Pageable pageable = PageRequest.of(page, size, sort);
+            Page<MovieDTO> moviePage = service.getMovieList(pageable);
+
+            if (moviePage.hasContent()) {
+                return new ResponseEntity<>(moviePage, HttpStatus.OK);
             } else {
                 return new ResponseEntity<>(HttpStatus.NO_CONTENT);
             }
@@ -90,6 +103,8 @@ public class MovieController {
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
+
+
 
     @Operation(
             summary = "Upload dataset",

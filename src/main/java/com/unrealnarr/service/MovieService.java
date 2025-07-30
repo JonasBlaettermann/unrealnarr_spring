@@ -1,8 +1,9 @@
 package com.unrealnarr.service;
 
 import com.unrealnarr.dto.MovieDTO;
-import com.unrealnarr.entity.Artist;
 import com.unrealnarr.entity.Movie;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.Collection;
@@ -11,15 +12,15 @@ import java.util.List;
 @Service
 public interface MovieService {
 
-    public Movie findMovieByTconst(String tconst) throws Exception;
+    Movie findMovieByTconst(String tconst) throws Exception;
 
-    public Collection<Movie> getMovies() throws Exception;
+    Collection<Movie> getMovies() throws Exception;
 
-    public Collection<MovieDTO> getMovieList() throws Exception;
+    Page<MovieDTO> getMovieList(Pageable pageable) throws Exception;
 
-    public void saveAll(List<Movie> movies) throws Exception;
+    void saveAll(List<Movie> movies) throws Exception;
 
-    public void updateMovie(String tconst, Movie updatedMovie) throws Exception;
+    void updateMovie(String tconst, Movie updatedMovie) throws Exception;
 
-    public void updateMovies(List<Movie> movies) throws Exception;
+    void updateMovies(List<Movie> movies) throws Exception;
 }
