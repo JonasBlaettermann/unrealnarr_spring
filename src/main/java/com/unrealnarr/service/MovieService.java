@@ -23,4 +23,6 @@ public interface MovieService {
     void updateMovie(String tconst, Movie updatedMovie) throws Exception;
 
     void updateMovies(List<Movie> movies) throws Exception;
+
+    Page<MovieDTO> searchMovies(String search, Pageable pageable) throws Exception;
 }

@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.mongodb.core.MongoTemplate;
+import org.springframework.data.support.PageableExecutionUtils;
 import org.springframework.stereotype.Service;
 
 import org.springframework.data.mongodb.core.query.Criteria;
@@ -139,6 +140,50 @@ public class MovieServiceImpl implements MovieService {
             throw new RuntimeException("Error updating movie with tconst: " + movie.getTconst(), e);
         }
     }
+
+    @Override
+    public Page<MovieDTO> searchMovies(String search, Pageable pageable) {
+        Query query = new Query();
+
+        if (search != null && !search.isEmpty()) {
+            Criteria criteria = new Criteria().orOperator(
+                    Criteria.where("primaryTitle").regex(search, "i"),
+                    Criteria.where("germanTitle").regex(search, "i"),
+                    Criteria.where("startYear").regex(search, "i")
+            );
+            query.addCriteria(criteria);
+        }
+
+        if (pageable.getSort().isSorted()) {
+            query.with(pageable.getSort());
+        }
+        query.with(pageable);
+
+        List<Movie> movies = mongoTemplate.find(query, Movie.class);
+
+        return PageableExecutionUtils.getPage(
+                movies,
+                pageable,
+                () -> mongoTemplate.count(Query.of(query).limit(-1).skip(-1), Movie.class)
+        ).map(movie -> {
+            MovieDTO movieDTO = new MovieDTO();
+            movieDTO.setTconst(movie.getTconst());
+            movieDTO.setTitleType(movie.getTitleType());
+            movieDTO.setGermanTitle(movie.getGermanTitle());
+            movieDTO.setPrimaryTitle(movie.getPrimaryTitle());
+            movieDTO.setOriginalTitle(movie.getOriginalTitle());
+            movieDTO.setStartYear(movie.getStartYear());
+            movieDTO.setEndYear(movie.getEndYear());
+            movieDTO.setRuntimeInMinutes(movie.getRuntimeInMinutes());
+            movieDTO.setGenres(movie.getGenres());
+            movieDTO.setIMDBRating(movie.getIMDBRating());
+            movieDTO.setRating(movie.getRating());
+            movieDTO.setDate(movie.getDate());
+            movieDTO.setTags(movie.getTags());
+            return movieDTO;
+        });
+    }
+
 
     @Override
     public void updateMovies(List<Movie> movies) throws Exception {

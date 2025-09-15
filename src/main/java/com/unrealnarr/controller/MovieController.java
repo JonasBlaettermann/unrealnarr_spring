@@ -84,7 +84,8 @@ public class MovieController {
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int size,
             @RequestParam(defaultValue = "primaryTitle") String sortBy,
-            @RequestParam(defaultValue = "asc") String sortDir
+            @RequestParam(defaultValue = "asc") String sortDir,
+            @RequestParam(required = false) String search
     ) {
         try {
             Sort sort = sortDir.equalsIgnoreCase("desc") ?
@@ -92,7 +93,13 @@ public class MovieController {
                     Sort.by(sortBy).ascending();
 
             Pageable pageable = PageRequest.of(page, size, sort);
-            Page<MovieDTO> moviePage = service.getMovieList(pageable);
+            Page<MovieDTO> moviePage;
+
+            if (search != null && !search.isBlank()) {
+                moviePage = service.searchMovies(search, pageable);
+            } else {
+                moviePage = service.getMovieList(pageable);
+            }
 
             if (moviePage.hasContent()) {
                 return new ResponseEntity<>(moviePage, HttpStatus.OK);
@@ -103,8 +110,6 @@ public class MovieController {
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
-
-
 
     @Operation(
             summary = "Upload dataset",
